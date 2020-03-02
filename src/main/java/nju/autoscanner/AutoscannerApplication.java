@@ -9,7 +9,6 @@ public class AutoscannerApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(AutoscannerApplication.class, args);
-        System.out.println("start");
         WhistleBlower.getInstance().start();
     }
 

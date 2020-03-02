@@ -1,5 +1,6 @@
 package nju.autoscanner.serviceImpl;
 
+import nju.autoscanner.Config;
 import nju.autoscanner.util.JGit.JGit;
 import nju.autoscanner.util.sonarWeb.SonarWeb;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -24,9 +25,7 @@ public class WhistleBlower {
     private SonarWeb sonar;
     private FileWriter fileWriter;
 
-    private static final String repoPath ="X:\\javaProjects\\sonar_example\\sonar-scanning-examples";//必须是repo根目录
-    private static final String repoName="example";
-    private static final String repoSource="src,copybooks";
+    private static final String repoPath =Config.repoPath;
 
     //读取同目录下的版本列表文件，构建要扫描的versionList
     private WhistleBlower() {
@@ -71,7 +70,7 @@ public class WhistleBlower {
             String currentVersion = versionList.get(currentIndex);
             currentIndex++;
             switchOver(currentVersion);
-            System.out.println(currentVersion+"scanning");
+            System.out.println(currentVersion+" is scanning");
             scan(currentVersion);
 
         }
@@ -80,7 +79,7 @@ public class WhistleBlower {
 
     //请求数据、切换至currentIndex指向的的版本并扫描
     public void next() {
-        System.out.println("get"+versionList.get(currentIndex-1)+" metrics");
+        System.out.println("got "+versionList.get(currentIndex-1)+" metrics");
         String result= null;
         try {
             result = sonar.findMetrics(versionList.get(currentIndex-1));
@@ -100,11 +99,7 @@ public class WhistleBlower {
     }
 
     private void scan(String version){
-        String cmd="sonar-scanner" +
-                " -Dsonar.projectName="+repoName+"_"+version
-                +" -Dsonar.projectKey="+version+
-                " -Dsonar.projectBaseDir="+repoPath+"\\sonarqube-scanner"+
-                " -Dsonar.sources="+ repoSource;//此命令参数也应在配置文件中配置
+        String cmd= Config.getCmd(version);
         try {
             Process s=Runtime.getRuntime().exec(new String[]{"cmd.exe","/C",cmd});
             Scanner out=new Scanner(s.getInputStream());
