@@ -1,6 +1,7 @@
 package nju.autoscanner.serviceImpl;
 
 import nju.autoscanner.Config;
+import nju.autoscanner.entity.Version;
 import nju.autoscanner.util.JGit.JGit;
 import nju.autoscanner.util.sonarWeb.SonarWeb;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -19,7 +20,7 @@ import java.util.Scanner;
 public class WhistleBlower {
     private static WhistleBlower instance=new WhistleBlower();
 
-    private ArrayList<String> versionList;
+    private ArrayList<Version> versionList;
     private int currentIndex;
     private static String path;
     private SonarWeb sonar;
@@ -41,7 +42,8 @@ public class WhistleBlower {
         while(s.hasNext()){
             String line=s.nextLine();
             if(!line.isEmpty()) {
-                versionList.add(line);
+                String[] infos=line.split(",");
+                versionList.add(new Version(infos[0],infos[1]));
             }
         }
 
@@ -67,7 +69,7 @@ public class WhistleBlower {
             }
             System.exit(0);
         }else {
-            String currentVersion = versionList.get(currentIndex);
+            String currentVersion = versionList.get(currentIndex).getTag();
             currentIndex++;
             switchOver(currentVersion);
             System.out.println(currentVersion+" is scanning");
@@ -79,14 +81,14 @@ public class WhistleBlower {
 
     //请求数据、切换至currentIndex指向的的版本并扫描
     public void next() {
-        System.out.println("got "+versionList.get(currentIndex-1)+" metrics");
+        System.out.println("got "+versionList.get(currentIndex-1).getTag()+" metrics");
         String result= null;
         try {
-            result = sonar.findMetrics(versionList.get(currentIndex-1));
+            result = sonar.findMetrics(versionList.get(currentIndex-1).getTag())+System.lineSeparator();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        write(result);
+        write(versionList.get(currentIndex-1).getTime(),result);
         start();
     }
 
@@ -101,7 +103,7 @@ public class WhistleBlower {
     private void scan(String version){
         String cmd= Config.getCmd(version);
         try {
-            Process s=Runtime.getRuntime().exec(new String[]{"cmd.exe","/C",cmd});
+            Process s=Runtime.getRuntime().exec(new String[]{"cmd.exe","/C",cmd},null,new File(Config.analysePath));
             Scanner out=new Scanner(s.getInputStream());
             Scanner error=new Scanner(s.getErrorStream());
             while(out.hasNext()){
@@ -115,9 +117,9 @@ public class WhistleBlower {
         }
     }
 
-    private void write(String metrics){
+    private void write(String time,String metrics){
         try {
-            fileWriter.write(metrics+System.lineSeparator());
+            fileWriter.write(time+" "+metrics+System.lineSeparator());
         } catch (IOException e) {
             e.printStackTrace();
         }
