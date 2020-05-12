@@ -120,6 +120,7 @@ public class WhistleBlower {
     private void write(String time,String metrics){
         try {
             fileWriter.write(time+" "+metrics+System.lineSeparator());
+            fileWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
