@@ -16,8 +16,6 @@ public class InformController {
 
     @PostMapping("callback")
     public void callBack(@RequestBody String result) {
-//        Gson gsn=new Gson();
-//        System.out.println(gsn.fromJson(result, CallBack.class));
         informService.callBack();
     }
 }

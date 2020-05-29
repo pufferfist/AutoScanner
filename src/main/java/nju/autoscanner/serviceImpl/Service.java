@@ -17,8 +17,8 @@ import java.util.Scanner;
  * 直接上spring boot是为了之后的扩展
  */
 
-public class WhistleBlower {
-    private static WhistleBlower instance=new WhistleBlower();
+public class Service {
+    private static Service instance=new Service();
 
     private ArrayList<Version> versionList;
     private int currentIndex;
@@ -29,7 +29,7 @@ public class WhistleBlower {
     private static final String repoPath =Config.repoPath;
 
     //读取同目录下的版本列表文件，构建要扫描的versionList
-    private WhistleBlower() {
+    private Service() {
         path=System.getProperty("user.dir");
         versionList=new ArrayList<>();
         String filePath=path+"\\version list.txt";
@@ -55,7 +55,7 @@ public class WhistleBlower {
         }
     }
 
-    public static WhistleBlower getInstance(){
+    public static Service getInstance(){
         return instance;
     }
 
@@ -76,7 +76,6 @@ public class WhistleBlower {
             scan(currentVersion);
 
         }
-
     }
 
     //请求数据、切换至currentIndex指向的的版本并扫描
@@ -98,6 +97,7 @@ public class WhistleBlower {
         } catch (GitAPIException e) {
             e.printStackTrace();
         }
+        JGit.getInstance().clean();
     }
 
     private void scan(String version){
